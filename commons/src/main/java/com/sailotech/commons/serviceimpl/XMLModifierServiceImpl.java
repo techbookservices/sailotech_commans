@@ -97,8 +97,8 @@ public class XMLModifierServiceImpl implements XMLModifierService {
 			    //calling the unmarshall method
 		       Object obj= unmarshallerObj.unmarshal(ss);
 		        System.out.println("");*/
-			   Items student=(Items) unmarshallerObj.unmarshal(xmlFile.getInputStream());
-			   System.out.println(student);
+			   Items items=(Items) unmarshallerObj.unmarshal(xmlFile.getInputStream());
+			   System.out.println(items);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
