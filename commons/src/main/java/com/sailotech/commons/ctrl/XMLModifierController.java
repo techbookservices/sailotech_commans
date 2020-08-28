@@ -7,15 +7,15 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sailotech.commons.model.ResponseModel;
 import com.sailotech.commons.service.XMLModifierService;
 
 /**
@@ -33,10 +33,16 @@ public class XMLModifierController {
 			@RequestParam(value = "xlsFile", required = true) MultipartFile xlsFile,@RequestParam(value = "attrValue", required = false) String attrValue,@RequestParam(value = "filter", required = false) boolean filter, HttpServletResponse response)
 			throws IOException {
 
-		String res = xmlService.modifyXMLFile(xmlFile, xlsFile,attrValue,filter);
+		ResponseModel res = xmlService.modifyXMLFile(xmlFile, xlsFile,attrValue,filter);
 		response.setContentType("application/xml");
-		response.setHeader("Content-Disposition", "attachment; filename=items_converted.xml");
-		response.getOutputStream().write(res.getBytes());
+		response.setHeader("Content-Disposition", "attachment; filename="+FilenameUtils.removeExtension(xmlFile.getOriginalFilename())+"_converted.xml");
+		response.setHeader("itemCount", ""+res.getItemsCount());
+		response.setHeader("mappingCount", ""+res.getMappingCount());
+		response.setHeader("replacedCount", ""+res.getReplacedCount());
+		response.setHeader("ignoredCount", ""+res.getIgnoredCount());
+		response.setHeader("errorCount", ""+res.getErrorCount());
+		
+		response.getOutputStream().write(res.getXml().getBytes());
 		response.flushBuffer();
 		/*
 		 * InputStream inputStream = new

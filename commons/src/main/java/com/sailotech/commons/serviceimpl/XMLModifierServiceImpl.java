@@ -29,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.sailotech.commons.model.RequestModel;
+import com.sailotech.commons.model.ResponseModel;
 import com.sailotech.commons.service.XMLModifierService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -93,8 +94,9 @@ public class XMLModifierServiceImpl implements XMLModifierService {
 	}
 
 	@Override
-	public String modifyXMLFile(MultipartFile xmlFile, MultipartFile xlsFile, String attrValue, boolean filter) {
+	public ResponseModel modifyXMLFile(MultipartFile xmlFile, MultipartFile xlsFile, String attrValue, boolean filter) {
 		Map<String, String> mappings = extractMappings(xlsFile);
+		ResponseModel response = new ResponseModel();
 		try {
 
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -104,9 +106,8 @@ public class XMLModifierServiceImpl implements XMLModifierService {
 			Document document = documentBuilder.parse(xmlFile.getInputStream());
 
 			NodeList itemList = document.getElementsByTagName("item");
-
-			System.out.println("Records in file :" + itemList.getLength());
-			System.out.println("Records in Mapping file :" + mappings.size());
+			response.setItemsCount(itemList.getLength());
+			response.setMappingCount( mappings.size());
 			String[] mappingKeys = mappings.keySet().toArray(new String[mappings.keySet().size()]);
 			int replacedCount = 0;
 			// remove element in loop case exception. by decrement for loop it will solve
@@ -158,10 +159,9 @@ public class XMLModifierServiceImpl implements XMLModifierService {
 				}
 			}
 
-			System.out.println("repalced Count "+replacedCount);
-			System.out.println("ignored count "+(itemList.getLength()-replacedCount));
-			
-			return toString(document);
+			response.setReplacedCount(replacedCount);
+			response.setIgnoredCount(itemList.getLength()-replacedCount);
+			response.setXml(toString(document));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -169,7 +169,7 @@ public class XMLModifierServiceImpl implements XMLModifierService {
 			e.printStackTrace();
 
 		}
-		return null;
+		return response;
 	}
 
 	private boolean replaceContent(Map<String, String> mappings, String[] mappingKeys, boolean replaced, Node node) {
