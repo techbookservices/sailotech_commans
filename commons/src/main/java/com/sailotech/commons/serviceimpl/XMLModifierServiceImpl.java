@@ -77,10 +77,13 @@ public class XMLModifierServiceImpl implements XMLModifierService {
 		try (XSSFWorkbook workbook = new XSSFWorkbook(xlsFile.getInputStream())){
 			XSSFSheet worksheet = workbook.getSheetAt(0);
 
-			for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
+			//i=0 read from first row
+			for (int i = 0; i < worksheet.getPhysicalNumberOfRows(); i++) {
 
 				XSSFRow row = worksheet.getRow(i);
-				hm.put(row.getCell(0).getStringCellValue(), row.getCell(1).getStringCellValue());
+				String key = row.getCell(0).getStringCellValue().trim().replaceAll("\u00A0", "");
+				String value = row.getCell(1).getStringCellValue().trim().replaceAll("\u00A0", "");
+				hm.put(key, value);
 
 			}
 			System.out.println(hm);
@@ -128,9 +131,9 @@ public class XMLModifierServiceImpl implements XMLModifierService {
 								if(StringUtils.equals(attr.getNodeName(), "acl")) {
 									replaced |= replaceContent(mappings, mappingKeys, replaced, l2Node);
 								}else {
-									boolean replaceValueOnly = StringUtils.isNotBlank(attrValue) && StringUtils.equals(attr.getNodeName(), "attrs")
-											&& StringUtils.equals(l2Node.getTextContent(),attrValue);
-										
+									boolean replaceValueOnly = StringUtils.isNotBlank(attrValue)
+											&& StringUtils.equals(attr.getNodeName(), "attrs")
+											&& StringUtils.contains(l2Node.getTextContent(), attrValue);
 									
 									for (int l = 0; l < l2Node.getChildNodes().getLength(); l++) {
 										Node l3Node = l2Node.getChildNodes().item(l);//attr|resr one element from array
@@ -174,10 +177,10 @@ public class XMLModifierServiceImpl implements XMLModifierService {
 
 	private boolean replaceContent(Map<String, String> mappings, String[] mappingKeys, boolean replaced, Node node) {
 		if (node.hasChildNodes() && StringUtils.containsAny(node.getChildNodes().item(0).getNodeValue(), mappingKeys)) {
+			replaced = (StringUtils.containsAny(node.getTextContent(), mappingKeys));
 			String replacedValue = replaceString(node.getChildNodes().item(0).getNodeValue(), mappingKeys, mappings);
 			if (!StringUtils.equals(replacedValue, node.getChildNodes().item(0).getNodeValue())) {
 				node.getChildNodes().item(0).setNodeValue(replacedValue);
-				replaced = true;
 			}
 		}
 		return replaced;

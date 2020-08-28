@@ -39,7 +39,7 @@ public class XMLModifierController {
 		response.setHeader("itemCount", ""+res.getItemsCount());
 		response.setHeader("mappingCount", ""+res.getMappingCount());
 		response.setHeader("replacedCount", ""+res.getReplacedCount());
-		response.setHeader("ignoredCount", ""+res.getIgnoredCount());
+		response.setHeader("skippedCount", ""+res.getIgnoredCount());
 		response.setHeader("errorCount", ""+res.getErrorCount());
 		
 		response.getOutputStream().write(res.getXml().getBytes());
